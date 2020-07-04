@@ -1,0 +1,23 @@
+{
+  "name": "socialnetwork",
+  "version": "1.0.0",
+  "description": "A simple Node-Express-MongoDb social network application API",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kufre-okon/SocialNetworkApi.git"
+  },
+  "keywords": [
+    "social",
+    "network"
+  ],
+  "author": "Kufre Okon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kufre-okon/SocialNetworkApi/issues"
+  },
+  "homepage": "https://github.com/kufre-okon/SocialNetworkApi#readme"
+}
