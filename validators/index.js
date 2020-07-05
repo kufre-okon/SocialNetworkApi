@@ -11,14 +11,14 @@ const validate = (validations) => {
             return next();
         }
 
-        console.log(errors);        
         return ApiResponse.handleValidationError(res, errors.array());
     }
 };
 
 const validator = {
     validate: validate,
-    post: require('./post.validator')
+    post: require('./post.validator'),
+    user: require('./user.validator')
 }
 
 module.exports = validator;

@@ -14,9 +14,9 @@ const ApiResponse = {
      * @param {Array} validationErrors Array of validation error object
      * @param {String} message  Additional message
      */
-    handleValidationError(res, validationErrors, message){
+    handleValidationError(res, validationErrors, message = null) {
         res.status(422).json({
-            data:validationErrors,
+            payload: validationErrors,
             message: message
         });
     },
@@ -28,7 +28,8 @@ const ApiResponse = {
      */
     handleError500(res, errorMessage) {
         res.status(500).json({
-            message: errorMessage
+            message: errorMessage,
+            payload: null
         });
     },
     /**
@@ -39,7 +40,8 @@ const ApiResponse = {
      */
     handleError(res, statusCode, errorMessage) {
         res.status(statusCode).json({
-            message: errorMessage
+            message: errorMessage,
+            payload: null
         });
     },
     /**
@@ -76,9 +78,9 @@ const ApiResponse = {
     * @param {*} data Response data
     * @param {String} message Additional message
     */
-    successWithStatus(res, statusCode, data, message) {
+    successWithStatus(res, statusCode, data, message = null) {
         res.status(statusCode).json({
-            data,
+            payload: data,
             message
         })
     }

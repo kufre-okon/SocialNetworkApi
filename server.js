@@ -32,6 +32,7 @@ mongoose.connect(dbConfig.DB_CONNECTION_STRING, {
 
 // routes
 require('./routes/post.routes')(app);
+require('./routes/auth.routes')(app);
 
 app.get("/", (req, res) => {
     res.send("Welcome to the Social Network API...");

@@ -14,7 +14,7 @@ module.exports = {
 
             ApiResponse.success(res, post);
         } catch (err) {
-            ApiResponse.handleError(res, 400, err.message || err);
+            ApiResponse.handleError500(res, err.message || err);
         }
     }
 }
