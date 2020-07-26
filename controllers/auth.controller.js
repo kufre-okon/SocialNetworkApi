@@ -1,5 +1,8 @@
 const User = require('../models/user.model');
 const ApiResponse = require('../helpers/apiresponse.helper');
+const jsonwebtoken = require('jsonwebtoken');
+const config = require('../config/config');
+
 
 const userViewmodel = (user) => {
     return {
@@ -24,14 +27,28 @@ module.exports = {
         }
     },
     signin: async (req, res) => {
-        const user = await User.findOne({
-            $or: [
-                { 'username': req.body.login },
-                { 'email': req.body.login }
-            ]
-        });
-        if (!user)
-            ApiResponse.handleError(res, 400, 'Invalid username or password');
+        const { login, password } = req.body;
+        try {
+            const user = await User.findOne({
+                $or: [
+                    { 'username': login },
+                     { 'email': login }
+                ]
+            });
+            if (user && user.authenticate(password)) {
+                let userVm = userViewmodel(user);
+                let token = jsonwebtoken.sign({ id: user.id },
+                    config.JWT_SECRET, {
+                    expiresIn: 86400 // 24hours
+                });
 
+                ApiResponse.success(res, { accessToken: token, user: userViewmodel(userVm) });
+            }
+            else {
+                ApiResponse.handleError(res, 400, 'Invalid username or password');
+            }
+        } catch (err) {
+            ApiResponse.handleError500(res, err.message || err);
+        }
     }
 }

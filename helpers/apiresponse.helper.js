@@ -1,12 +1,9 @@
-class AppicationError extends Error {
-    constructor(statusCode, message) {
-        super();
-        this.statusCode = statusCode;
-        this.message = message;
-    }
-}
 
-const ApiResponse = {
+class ApiResponse {
+
+    constructor() {
+
+    }
 
     /**
      * Return 422 error formatted response to the caller
@@ -19,7 +16,7 @@ const ApiResponse = {
             payload: validationErrors,
             message: message
         });
-    },
+    }
 
     /**
      * Return 500-error formatted response to the caller
@@ -31,7 +28,8 @@ const ApiResponse = {
             message: errorMessage,
             payload: null
         });
-    },
+    }
+
     /**
      * Return generic error formatted response to the caller
      * @param {Response} res Router response object
@@ -43,7 +41,8 @@ const ApiResponse = {
             message: errorMessage,
             payload: null
         });
-    },
+    }
+
     /**
      * Return paginated api response to the user   
      * @param {Response} res Router response object 
@@ -52,6 +51,7 @@ const ApiResponse = {
      * @param {number} totalItems Total items that matches the query
      * @param {Array} items Json data
      */
+
     successPaginate(res, page, pageSize, totalItems, items) {
         let paging = {
             page,
@@ -61,7 +61,8 @@ const ApiResponse = {
             items
         }
         this.successWithStatus(res, 200, paging, null);
-    },
+    }
+
     /**
     * Return success api response to the user   
     * @param {Response} res Router response object 
@@ -70,7 +71,8 @@ const ApiResponse = {
     */
     success(res, data, message) {
         this.successWithStatus(res, 200, data, message);
-    },
+    }
+
     /**
     * Return success api response to the user
     * @param {Response} res Router response object
@@ -86,4 +88,4 @@ const ApiResponse = {
     }
 }
 
-module.exports = ApiResponse;
+module.exports = new ApiResponse();

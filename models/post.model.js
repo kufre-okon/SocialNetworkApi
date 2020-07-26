@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const baseSchema = require('./basemodel.model');
+const { ObjectId } = mongoose.Schema;
 
 const postSchema = new mongoose.Schema({
     title: {
@@ -13,6 +14,14 @@ const postSchema = new mongoose.Schema({
         required: 'Body is required',
         minlength: 4,
         max: 2000
+    },
+    photo: {
+        data: Buffer,
+        contentType: String
+    },
+    postedBy: {
+        type: ObjectId,
+        ref: "User"
     }
 }, {
     timestamps: true

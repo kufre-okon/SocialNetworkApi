@@ -33,6 +33,7 @@ mongoose.connect(dbConfig.DB_CONNECTION_STRING, {
 // routes
 require('./routes/post.routes')(app);
 require('./routes/auth.routes')(app);
+require('./routes/user.route')(app);
 
 app.get("/", (req, res) => {
     res.send("Welcome to the Social Network API...");
@@ -51,7 +52,7 @@ app.use((req, res) => {
 })
 
 app.use((err, req, res, next) => {
-    console.log(err);
+    // console.log(err);
     ApiResponse.handleError500(res, "Server error...something went wrong");
 })
 
