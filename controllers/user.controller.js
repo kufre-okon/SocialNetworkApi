@@ -61,7 +61,7 @@ module.exports = {
                     if (!user)
                         return ApiResponse.handleError(res, 400, 'User not found.');
                 }).catch((err) => {
-                    return ApiResponse.handleError(res, 400, 'User not found.');
+                    return ApiResponse.handleError(res, 400, err.message||err);
                 })
 
             ApiResponse.success(res, null, 'User updated successfully');
