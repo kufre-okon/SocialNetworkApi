@@ -8,12 +8,10 @@ class ApiResponse {
     /**
      * Return 422 error formatted response to the caller
      * @param {Response} res Router response object
-     * @param {Array} validationErrors Array of validation error object
      * @param {String} message  Additional message
      */
-    handleValidationError(res, validationErrors, message = null) {
-        res.status(422).json({
-            payload: validationErrors,
+    handleValidationError(res, message) {
+        res.status(422).json({            
             message: message
         });
     }
