@@ -30,6 +30,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-formidable": "^1.2.0",
+    "express-swagger-generator": "^1.1.17",
     "express-validator": "^6.6.0",
     "formidable": "^1.2.2",
     "jsonwebtoken": "^8.5.1",
@@ -38,7 +39,6 @@
     "moment": "^2.27.0",
     "mongoose": "^5.9.21",
     "morgan": "^1.10.0",
-    "swagger-ui-express": "^4.1.4",
     "uuid": "^8.2.0"
   },
   "devDependencies": {

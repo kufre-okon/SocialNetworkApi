@@ -5,6 +5,17 @@ const fs = require('fs');
 const { isValidObjectId } = require('../helpers/modelhelper.helper');
 
 module.exports = {
+    /**
+     * Get all posts
+     * @route GET /posts/
+     * @group Post
+     * @param {string} page.query.required - page index 
+     * @param {string} pageSize.query.required - page size
+     * @param {string} postedBy.query - User Id
+     * @returns {object} 200 - { payload: Array<Post>,message:null}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     getPosts: async (req, res) => {
         try {
             let { postedBy, page, pageSize } = req.query;
@@ -29,7 +40,17 @@ module.exports = {
             ApiResponse.handleError(res, 400, err.message || err);
         }
     },
-
+    /**
+     * Create new post
+     * @route POST /posts
+     * @group Post   
+     * @param {string} title.body.required - post title
+     * @param {string} body.body.required - post body
+     * @param {string} photo.body - post avater
+     * @returns {object} 200 - { payload: Post object,message:null}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     createPost: (req, res) => {
 
         let form = new formidable.IncomingForm();
@@ -54,6 +75,15 @@ module.exports = {
             });
         })
     },
+    /**
+     * Get post
+     * @route GET /posts/:id
+     * @group Post   
+     * @param {string} id.param.required - post title
+     * @returns {object} 200 - { payload: Post object,message:null}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     getPostById: async (req, res) => {
         try {
             if (!isValidObjectId(req.params.id))
@@ -66,6 +96,18 @@ module.exports = {
             ApiResponse.handleError(res, 400, err.message || err);
         }
     },
+    /**
+     * Update post
+     * @route PUT /posts/:id
+     * @group Post   
+     * @param {string} id.param.required - post Id
+     * @param {string} title.body.required - post title
+     * @param {string} body.body.required - post body
+     * @param {string} photo.body - post avater
+     * @returns {object} 200 - { payload: null,message:message}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     updatePost: (req, res) => {
         try {
             if (!isValidObjectId(req.params.id))
@@ -99,6 +141,15 @@ module.exports = {
             ApiResponse.handleError(res, 400, err.message || err);
         }
     },
+    /**
+     * Delete post
+     * @route DELETE /posts/:id
+     * @group Post   
+     * @param {string} id.param.required - post Id
+     * @returns {object} 200 - { payload: null,message:null}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     deletePost: async (req, res) => {
         try {
             if (!isValidObjectId(req.params.id))

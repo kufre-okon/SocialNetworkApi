@@ -2,14 +2,13 @@ const express = require('express');
 const bodyparser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
-const dbConfig = require('./config/config');
+const config = require('./config/config');
 const ApiResponse = require('./helpers/apiresponse.helper');
 const mongoose = require('mongoose');
 
-const router = express.Router();
 const app = express();
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
+
+require('./swagger_init')(app);
 
 var corsOptions = {
     origin: []
@@ -20,7 +19,7 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }))
 app.use(morgan('dev'));
 
-mongoose.connect(dbConfig.DB_CONNECTION_STRING, {
+mongoose.connect(config.DB_CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     keepAlive: 1
@@ -37,9 +36,6 @@ mongoose.connect(dbConfig.DB_CONNECTION_STRING, {
 require('./routes/post.routes')(app);
 require('./routes/auth.routes')(app);
 require('./routes/user.route')(app);
-
-router.use('/api-docs', swaggerUi.serve);
-router.get('/api-docs', swaggerUi.setup(swaggerDocument));
 
 app.get("/", (req, res) => {
     res.send("Welcome to the Social Network API...");

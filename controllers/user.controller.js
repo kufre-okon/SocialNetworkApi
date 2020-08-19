@@ -23,6 +23,15 @@ const userViewmodel = (user) => {
 };
 
 module.exports = {
+    /**
+     * Get User by Id API
+     * @route GET /users/:Id
+     * @group User
+     * @param {string} id.param.required - user Id    
+     * @returns {object}  200 - { payload: User Object,message:null}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     userById: async (req, res) => {
         try {
             if (!isValidObjectId(req.params.id))
@@ -37,6 +46,19 @@ module.exports = {
             ApiResponse.handleError500(res, err.message || err);
         }
     },
+    /**
+     * Update User by Id API
+     * @route PUT /users/:Id
+     * @group User
+     * @param {string} id.param.required - user Id  
+     * @param {string} firstName.body.required - first name
+     * @param {string} lastName.body.required - last name
+     * @param {string} email.body.required - email
+     * @param {file}   photo.body - Profile photo
+     * @returns {object} 200 - { payload: User Object,message:null}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     update: (req, res) => {
 
         if (!isValidObjectId(req.params.id))
@@ -67,6 +89,16 @@ module.exports = {
             ApiResponse.success(res, null, 'User updated successfully');
         })
     },
+    /**
+     * Get all users
+     * @route GET /users/
+     * @group User
+     * @param {string} page.query.required - page index 
+     * @param {string} pageSize.query.required - page size
+     * @returns {object} 200 - { payload: Array<User>,message:null}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     getAllUsers: async (req, res) => {
         try {
             let page = parseInt(req.query.page) || 1,
@@ -85,6 +117,16 @@ module.exports = {
             ApiResponse.handleError500(res, err.message || err);
         }
     },
+   /**
+     * Toggle User status
+     * @route PUT /users/:id/changestatus/:status
+     * @group User
+     * @param {string} id.param.required - user Id
+     * @param {boolean} status.body.required - status to be activated
+     * @returns {object} 200 - {message:null}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     disable: async (req, res) => {
         const { id, status } = req.params;
 
@@ -100,6 +142,17 @@ module.exports = {
             ApiResponse.handleError500(res, err.message || err);
         }
     },
+
+    /**
+     * Add User followers
+     * @route PUT /users/follow
+     * @group User
+     * @param {string} userId.body.required - user Id(follower)
+     * @param {string} followId.body.required - user Id to be followed
+     * @returns {object} 200 - {payload:User Object(User to be followed), message:null}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     addFollower: async (req, res) => {
         try {
             // Add following
@@ -125,6 +178,16 @@ module.exports = {
             ApiResponse.handleError(res, 400, err.message || err);
         }
     },
+    /**
+     * Remove User follwers
+     * @route PUT /users/unfollow
+     * @group User
+     * @param {string} userId.body.required - user Id(follower)
+     * @param {string} unfollowId.body.required - user Id to be unfollowed
+     * @returns {object} 200 - {payload:User Object(User to be unfollowed), message:null}
+     * @returns {string} 500 - { message: Server error message}
+     * @security JWT
+     */
     removeFollower: async (req, res) => {
         try {
             // Remove following

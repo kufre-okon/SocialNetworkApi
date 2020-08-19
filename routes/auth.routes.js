@@ -6,7 +6,7 @@ const { checkDuplicateUsernameOrEmail } = require('../middlewares/verifySignUp')
 const router = express.Router();
 
 module.exports = (app) => {
-
+    
     router.post('/signup',
         validate(userValiate.createUserValidator()),
         checkDuplicateUsernameOrEmail,
