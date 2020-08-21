@@ -73,9 +73,12 @@ module.exports = {
             }
 
             let user = { ...fields };
+
             if (files.photo) {
-                user.photo.data = fs.readFileSync(files.photo.path);
-                user.photo.contentType = files.photo.type;
+                user.photo = {
+                    data: fs.readFileSync(files.photo.path),
+                    contentType: files.photo.type
+                }
             }
 
             User.findByIdAndUpdate(req.params.id, user, { new: true, useFindAndModify: false })
@@ -83,7 +86,7 @@ module.exports = {
                     if (!user)
                         return ApiResponse.handleError(res, 400, 'User not found.');
                 }).catch((err) => {
-                    return ApiResponse.handleError(res, 400, err.message||err);
+                    return ApiResponse.handleError(res, 400, err.message || err);
                 })
 
             ApiResponse.success(res, null, 'User updated successfully');
@@ -117,16 +120,16 @@ module.exports = {
             ApiResponse.handleError500(res, err.message || err);
         }
     },
-   /**
-     * Toggle User status
-     * @route PUT /users/:id/changestatus/:status
-     * @group User
-     * @param {string} id.param.required - user Id
-     * @param {boolean} status.body.required - status to be activated
-     * @returns {object} 200 - {message:null}
-     * @returns {string} 500 - { message: Server error message}
-     * @security JWT
-     */
+    /**
+      * Toggle User status
+      * @route PUT /users/:id/changestatus/:status
+      * @group User
+      * @param {string} id.param.required - user Id
+      * @param {boolean} status.body.required - status to be activated
+      * @returns {object} 200 - {message:null}
+      * @returns {string} 500 - { message: Server error message}
+      * @security JWT
+      */
     disable: async (req, res) => {
         const { id, status } = req.params;
 
