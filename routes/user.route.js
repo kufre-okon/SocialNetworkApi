@@ -5,8 +5,8 @@ const { validate, user: userValidate } = require('../validators');
 
 module.exports = (app) => {
 
-    router.get('/', requireSignIn, controller.getAllUsers);
-    router.get('/:id', requireSignIn, controller.userById);
+    router.get('/', controller.getAllUsers);
+    router.get('/:id', controller.userById);
     router.put('/:id',
         requireSignIn,
         controller.update,

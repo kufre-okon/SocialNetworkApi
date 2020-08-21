@@ -18,7 +18,7 @@ const userViewmodel = (user) => {
         isActive: user.isActive,
         photo: user.photo,
         following: user.following,
-        followers: user.followers
+        followers: user.followers,
     }
 };
 
@@ -110,7 +110,7 @@ module.exports = {
 
             let totalDoc = await User.countDocuments(match);
             let users = await User.find(match).skip((page - 1) * limit)
-                .limit(limit)
+                .limit(limit)                
                 .exec();
 
             let data = users.map(u => userViewmodel(u));
