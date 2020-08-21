@@ -35,7 +35,7 @@ module.exports = {
     userById: async (req, res) => {
         try {
             if (!isValidObjectId(req.params.id))
-                throw new Error("Invalid post id");
+                throw new Error("Invalid user id");
 
             var user = await User.findById(req.params.id)
                 .populate('following', 'id name')
@@ -47,7 +47,7 @@ module.exports = {
         }
     },
     /**
-     * Update User by Id API
+     * Update User by Id API, body parameter must be FormData object
      * @route PUT /users/:Id
      * @group User
      * @param {string} id.param.required - user Id  
@@ -62,7 +62,7 @@ module.exports = {
     update: (req, res) => {
 
         if (!isValidObjectId(req.params.id))
-            return ApiResponse.handleError(res, 400, "Invalid post id");
+            return ApiResponse.handleError(res, 400, "Invalid user id");
 
         let form = new formidable.IncomingForm();
         form.keepExtensions = true;
@@ -95,7 +95,7 @@ module.exports = {
      * @group User
      * @param {string} page.query.required - page index 
      * @param {string} pageSize.query.required - page size
-     * @returns {object} 200 - { payload: Array<User>,message:null}
+     * @returns {object} 200 - { payload: Paginated Array<User>,message:null}
      * @returns {string} 500 - { message: Server error message}
      * @security JWT
      */

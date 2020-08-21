@@ -11,10 +11,10 @@ const app = express();
 require('./swagger_init')(app);
 
 var corsOptions = {
-    origin: []
+    origin: ['*']
 }
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }))
 app.use(morgan('dev'));
