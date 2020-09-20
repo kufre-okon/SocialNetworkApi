@@ -2,11 +2,18 @@ const express = require('express');
 const bodyparser = require('body-parser');
 // const cors = require('cors');
 const morgan = require('morgan');
-const config = require('./config/config');
 const ApiResponse = require('./helpers/apiresponse.helper');
 const mongoose = require('mongoose');
 
 const app = express();
+
+
+if (process.env.NODE_ENV !== 'production') {
+    const parsed = require('dotenv').config();
+    console.log(parsed);
+}
+
+
 
 require('./swagger_init')(app);
 
@@ -25,7 +32,7 @@ app.use(function (req, res, next) {
 });
 
 
-mongoose.connect(config.DB_CONNECTION_STRING, {
+mongoose.connect(process.env.DB_CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     keepAlive: 1

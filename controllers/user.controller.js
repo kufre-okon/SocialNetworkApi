@@ -4,6 +4,7 @@ const formidable = require('formidable');
 const _ = require('lodash');
 const fs = require('fs');
 const { isValidObjectId } = require('../helpers/modelhelper.helper');
+const modelhelper = require('../helpers/modelhelper.helper');
 
 
 const userViewmodel = (user) => {
@@ -16,7 +17,6 @@ const userViewmodel = (user) => {
         updatedAt: user.updatedAt,
         id: user.id,
         isActive: user.isActive,
-        photo: user.photo,
         following: user.following,
         followers: user.followers,
     }
@@ -28,7 +28,7 @@ module.exports = {
      * @route GET /users/:Id
      * @group User
      * @param {string} id.param.required - user Id    
-     * @returns {object}  200 - { payload: User Object,message:null}
+     * @returns {object} 200 - { payload: User Object,message:null}
      * @returns {string} 500 - { message: Server error message}
      * @security JWT
      */
@@ -38,8 +38,8 @@ module.exports = {
                 throw new Error("Invalid user id");
 
             var user = await User.findById(req.params.id)
-                .populate('following', 'id name')
-                .populate('followers', 'id name')
+                .populate('following', 'id firstName lastName')
+                .populate('followers', 'id firstName lastName')
                 .exec();
             ApiResponse.success(res, userViewmodel(user));
         } catch (err) {
@@ -81,15 +81,21 @@ module.exports = {
                 }
             }
 
-            User.findByIdAndUpdate(req.params.id, user, { new: true, useFindAndModify: false })
-                .then((user) => {
-                    if (!user)
-                        return ApiResponse.handleError(res, 400, 'User not found.');
-                }).catch((err) => {
-                    return ApiResponse.handleError(res, 400, err.message || err);
-                })
+            User.findOne({ email: user.email }).then((userByEmail) => {
+                if (userByEmail && userByEmail.id !== req.params.id) {
+                    return ApiResponse.handleError(res, 400, 'Email already taken.');
+                }
 
-            ApiResponse.success(res, null, 'User updated successfully');
+                User.findByIdAndUpdate(req.params.id, user, { new: true, useFindAndModify: false })
+                    .then((user) => {
+                        if (!user)
+                            return ApiResponse.handleError(res, 400, 'User not found.');
+                        else
+                            return ApiResponse.success(res, null, 'User updated successfully');
+                    }).catch((err) => {
+                        return ApiResponse.handleError(res, 400, err.message || err);
+                    })
+            });
         })
     },
     /**
@@ -99,8 +105,7 @@ module.exports = {
      * @param {string} page.query.required - page index 
      * @param {string} pageSize.query.required - page size
      * @returns {object} 200 - { payload: Paginated Array<User>,message:null}
-     * @returns {string} 500 - { message: Server error message}
-     * @security JWT
+     * @returns {string} 500 - { message: Server error message}     
      */
     getAllUsers: async (req, res) => {
         try {
@@ -110,7 +115,7 @@ module.exports = {
 
             let totalDoc = await User.countDocuments(match);
             let users = await User.find(match).skip((page - 1) * limit)
-                .limit(limit)                
+                .limit(limit)
                 .exec();
 
             let data = users.map(u => userViewmodel(u));
@@ -120,6 +125,20 @@ module.exports = {
             ApiResponse.handleError500(res, err.message || err);
         }
     },
+    /**
+     * Get user avatar image as stream
+     * @param {string} id.param.required - user Id
+     * @returns {object} 200 - image data stream
+     */
+    getAvatar: async (req, res) => {
+        const userId = req.params.id;
+        const user = await User.findById(userId);
+        if (user.photo && user.photo.data) {
+            res.set('Content-Type', user.photo.contentType);
+            res.send(user.photo.data);
+        }
+    },
+
     /**
       * Toggle User status
       * @route PUT /users/:id/changestatus/:status
@@ -173,12 +192,12 @@ module.exports = {
                     followers: req.body.userId
                 }
             }, { new: true })
-                .populate('following', 'id name')
-                .populate('followers', 'id name')
+                .populate('following', 'id firstName lastName')
+                .populate('followers', 'id firstName lastName')
                 .exec();
             ApiResponse.success(res, userViewmodel(user));
         } catch (err) {
-            ApiResponse.handleError(res, 400, err.message || err);
+            ApiResponse.handleError(res, 500, err.message || err);
         }
     },
     /**
@@ -206,8 +225,8 @@ module.exports = {
                     followers: req.body.userId
                 }
             }, { new: true })
-                .populate('following', 'id name')
-                .populate('followers', 'id name')
+                .populate('following', 'id firstName lastName')
+                .populate('followers', 'id firstName lastName')
                 .exec();
             ApiResponse.success(res, userViewmodel(user));
         } catch (err) {

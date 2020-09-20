@@ -4,6 +4,20 @@ const formidable = require('formidable');
 const fs = require('fs');
 const { isValidObjectId } = require('../helpers/modelhelper.helper');
 
+
+const postViewmodel = (post) => {
+    return {
+        title: post.title,
+        body: post.body,
+        id: post.id,
+        postedBy: post.postedBy ? post.postedBy : {},
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        likes: post.likes,
+        comments: post.comments
+    }
+};
+
 module.exports = {
     /**
      * Get all posts
@@ -13,8 +27,7 @@ module.exports = {
      * @param {string} pageSize.query.required - page size
      * @param {string} postedBy.query - User Id
      * @returns {object} 200 - { payload: Array<Post>,message:null}
-     * @returns {string} 500 - { message: Server error message}
-     * @security JWT
+     * @returns {string} 500 - { message: Server error message}    
      */
     getPosts: async (req, res) => {
         try {
@@ -32,10 +45,10 @@ module.exports = {
             const posts = await Post.find(match)
                 .skip((page - 1) * pageSize)
                 .limit(pageSize)
-                .sort('createdAt')
+                .sort({ createdAt: -1 })
                 .populate('postedBy', "firstName lastName")
                 .exec();
-            ApiResponse.successPaginate(res, page, pageSize, totalDocs, posts);
+            ApiResponse.successPaginate(res, page, pageSize, totalDocs, posts.map((p) => postViewmodel(p)));
         } catch (err) {
             ApiResponse.handleError(res, 400, err.message || err);
         }
@@ -65,33 +78,55 @@ module.exports = {
             const post = new Post(fields);
             post.postedBy = req.user.id;
             if (files.photo) {
-                post.photo.data = fs.readFileSync(files.photo.path)
-                post.photo.contentType = files.photo.type
+                post.photo = {
+                    data: fs.readFileSync(files.photo.path),
+                    contentType: files.photo.type
+                }
             }
             post.save().then(() => {
-                ApiResponse.success(res, post);
+                ApiResponse.success(res, postViewmodel(post));
             }).catch((err) => {
                 ApiResponse.handleError(res, 400, err.message || err);
             });
         })
     },
+
+    /**
+  * Get post image as stream
+  * @param {string} id.param.required - post Id
+  * @returns {object} 200 - image data stream
+  */
+    getPhoto: async (req, res) => {
+        const postId = req.params.id;
+
+        const post = await Post.findById(postId);
+        if (post.photo && post.photo.data) {
+            res.set('Content-Type', post.photo.contentType);
+            res.send(post.photo.data);
+        }
+
+    },
+
     /**
      * Get post
      * @route GET /posts/:id
      * @group Post   
      * @param {string} id.param.required - post title
      * @returns {object} 200 - { payload: Post object,message:null}
-     * @returns {string} 500 - { message: Server error message}
-     * @security JWT
+     * @returns {string} 500 - { message: Server error message}     
      */
     getPostById: async (req, res) => {
         try {
             if (!isValidObjectId(req.params.id))
                 throw new Error("Invalid post id");
 
-            let post = await Post.findById(req.params.id).populate('postedBy', 'firstName lastName');
+            let post = await Post.findById(req.params.id)
+                .populate('postedBy', 'firstName lastName')
+                .populate('comments', 'id text createdAt')
+                .populate('comments.postedBy', 'firstName lastName')
+                .populate('likes', 'firstName lastName');
 
-            return ApiResponse.success(res, post);
+            return ApiResponse.success(res, postViewmodel(post));
         } catch (err) {
             ApiResponse.handleError(res, 400, err.message || err);
         }
@@ -124,9 +159,10 @@ module.exports = {
                 const post = { ...fields };
 
                 if (files.photo) {
-                    post.photo = {};
-                    post.photo.data = fs.readFileSync(files.photo.path);
-                    post.photo.contentType = files.photo.type;
+                    post.photo = {
+                        data: fs.readFileSync(files.photo.path),
+                        contentType: files.photo.type
+                    }
                 }
                 Post.findByIdAndUpdate(req.params.id, post, { new: true, useFindAndModify: false })
                     .then((_post) => {
@@ -163,6 +199,113 @@ module.exports = {
             return ApiResponse.success(res);
         } catch (err) {
             ApiResponse.handleError(res, 400, err.message || err);
+        }
+    },
+
+    /**
+     * Like a post
+     * @route PUT /posts/:id/like
+     * @group Post 
+     * @param {string} id.param.required - post id
+     * @param { string } userId.body.required - user id
+     * @param { string } postId.body.required - post id
+     * @returns {object} 200 - {Payload{post,message}}
+     * @returns {object} 500 - {Payload{message}}
+     * @security JWT
+     */
+    like: async (req, res) => {
+        const { postId, userId } = req.body;
+        try {
+            let post = await Post.findByIdAndUpdate(postId, {
+                $push: { likes: userId }
+            }, { new: true })
+                .populate('postedBy', 'firstName lastName')
+                .populate('likes', 'firstName lastName')
+                .exec();
+            return ApiResponse.success(res, postViewmodel(post));
+        } catch (err) {
+            ApiResponse.handleError(res, 500, err.message || err);
+        }
+    },
+    /**
+    * UnLike a post
+    * @route PUT /posts/:id/unlike
+    * @group Post 
+    * @param {string} id.param.required - post id
+    * @param { string } userId.body.required - user id
+    * @param { string } postId.body.required - post id
+    * @returns {object} 200 - {Payload{post,message}}
+    * @returns {object} 500 - {Payload{message}}
+    * @security JWT
+    */
+    unlike: async (req, res) => {
+        const { postId, userId } = req.body;
+        try {
+            let post = await Post.findByIdAndUpdate(postId, {
+                $pull: { likes: userId }
+            }, { new: true })
+                .populate('postedBy', 'firstName lastName')
+                .populate('likes', 'firstName lastName')
+                .exec();
+            return ApiResponse.success(res, postViewmodel(post));
+        } catch (err) {
+            ApiResponse.handleError(res, 500, err.message || err);
+        }
+    },
+    /**
+    * Comment on a post
+    * @route PUT /posts/:id/comment
+    * @group Post 
+    * @param {string} id.param.required - post id
+    * @param { string } userId.body.required - user id
+    * @param { string } postId.body.required - post id
+    * @param { string } text.body.required - comment text
+    * @returns {object} 200 - {Payload{post,message}}
+    * @returns {object} 500 - {Payload{message}}
+    * @security JWT
+    */
+    comment: async (req, res) => {
+        const { postId, userId, text } = req.body;
+        let comment = { postedBy: userId, text };
+        try {
+            let post = await Post.findByIdAndUpdate(postId, {
+                $push: { comments: comment }
+            }, { new: true })
+                .populate('postedBy', 'firstName lastName')
+                .populate('likes', 'firstName lastName')
+                .populate('comments', 'id text createdAt')
+                .populate('comments.postedBy', 'firstName lastName')
+                .exec();
+            return ApiResponse.success(res, postViewmodel(post));
+        } catch (err) {
+            ApiResponse.handleError(res, 500, err.message || err);
+        }
+    },
+    /**
+    * Uncomment a post
+    * @route PUT /posts/:id/uncomment
+    * @group Post 
+    * @param {string} id.param.required - post id
+    * @param {string} commentId.body.required - comment id
+    * @param {string} postId.body.required - post id
+    * @returns {object} 200 - {Payload{post,message}}
+    * @returns {object} 500 - {Payload{message}}
+    * @security JWT
+    */
+    uncomment: async (req, res) => {
+        const { postId, commentId } = req.body;
+        try {
+            let post = await Post.findByIdAndUpdate(postId, {
+                $pull: { comments: { _id: commentId } }
+            }, { new: true })
+                .populate('postedBy', 'firstName lastName')
+                .populate('likes', 'firstName lastName')
+                .populate('comments', 'id text createdAt')
+                .populate('comments.postedBy', 'firstName lastName')
+                .exec();
+            return ApiResponse.success(res, postViewmodel(post));
+        } catch (err) {
+            ApiResponse.handleError(res, 500, err.message || err);
         }
     }
 }

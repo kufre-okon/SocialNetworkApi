@@ -2,8 +2,7 @@
 
 module.exports = function (app) {
 
-    
-const config = require('./config/config');
+
     const expressSwagger = require('express-swagger-generator')(app);
 
     let options = {
@@ -13,7 +12,7 @@ const config = require('./config/config');
                 title: 'Social Network API',
                 version: '1.0.0',
             },
-            host: config.LAUNCH_URL,
+            host: process.env.LAUNCH_URL,
             basePath: '/api',
             produces: [
                 "application/json",

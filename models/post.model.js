@@ -22,7 +22,13 @@ const postSchema = new mongoose.Schema({
     postedBy: {
         type: ObjectId,
         ref: "User"
-    }
+    },
+    likes: [{ type: ObjectId, ref: 'User' }],
+    comments: [{
+        text: { type: String },
+        createdAt: { type: Date, default: Date.now },
+        postedBy: { type: ObjectId, ref: 'User' }
+    }]
 }, {
     timestamps: true
 })

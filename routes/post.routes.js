@@ -7,17 +7,29 @@ const router = express.Router();
 
 module.exports = (app) => {
 
-    router.get("/", requireSignIn, controller.getPosts);
+    router.get("/", controller.getPosts);
     router.post('/',
         requireSignIn,
         controller.createPost,
         validate(post.createPostValidator()));
+    router.get('/:id/photo', controller.getPhoto);
     router.get('/:id',
-        requireSignIn,
         controller.getPostById);
     router.delete('/:id',
         requireSignIn,
         controller.deletePost);
+    router.put('/:id/unlike',
+        requireSignIn,
+        controller.unlike);
+    router.put('/:id/like',
+        requireSignIn,
+        controller.like);
+    router.put('/:id/comment',
+        requireSignIn,
+        controller.comment);
+    router.put('/:id/uncomment',
+        requireSignIn,
+        controller.uncomment);
     router.put('/:id',
         requireSignIn,
         controller.updatePost,

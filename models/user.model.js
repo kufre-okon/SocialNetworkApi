@@ -52,6 +52,10 @@ const userSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    resetPasswordLink: {
+        data: String,
+        default: ''
     }
 }, {
     timestamps: true

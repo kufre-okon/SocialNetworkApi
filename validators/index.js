@@ -18,7 +18,8 @@ const validate = (validations) => {
 const validator = {
     validate: validate,
     post: require('./post.validator'),
-    user: require('./user.validator')
+    user: require('./user.validator'),
+    password:require('./password.validator')
 }
 
 module.exports = validator;
