@@ -131,8 +131,8 @@ module.exports = {
      * @returns {object} 200 - image data stream
      */
     getAvatar: async (req, res) => {
-        const userId = req.params.id;
-        const user = await User.findById(userId);
+        const { id } = req.params;
+        const user = await User.findById(id);
         if (user.photo && user.photo.data) {
             res.set('Content-Type', user.photo.contentType);
             res.send(user.photo.data);
@@ -169,7 +169,7 @@ module.exports = {
      * Add User followers
      * @route PUT /users/follow
      * @group User
-     * @param {string} userId.body.required - user Id(follower)
+     * @param {string} id.body.required - user Id(follower)
      * @param {string} followId.body.required - user Id to be followed
      * @returns {object} 200 - {payload:User Object(User to be followed), message:null}
      * @returns {string} 500 - { message: Server error message}
@@ -178,18 +178,18 @@ module.exports = {
     addFollower: async (req, res) => {
         try {
             // Add following
-            // the login user 'req.body.userId' is following the user 'req.body.followId'
-            await User.findByIdAndUpdate(req.body.userId, {
+            // the login user 'req.body.id' is following the user 'req.body.followId'
+            await User.findByIdAndUpdate(req.body.id, {
                 $push: {
                     following: req.body.followId
                 }
             })
 
             // Add follower
-            // the login user 'req.body.userId' is a follower of the user 'req.body.followId'
+            // the login user 'req.body.id' is a follower of the user 'req.body.followId'
             let user = await User.findByIdAndUpdate(req.body.followId, {
                 $push: {
-                    followers: req.body.userId
+                    followers: req.body.id
                 }
             }, { new: true })
                 .populate('following', 'id firstName lastName')
@@ -204,7 +204,7 @@ module.exports = {
      * Remove User follwers
      * @route PUT /users/unfollow
      * @group User
-     * @param {string} userId.body.required - user Id(follower)
+     * @param {string} id.body.required - user Id(follower)
      * @param {string} unfollowId.body.required - user Id to be unfollowed
      * @returns {object} 200 - {payload:User Object(User to be unfollowed), message:null}
      * @returns {string} 500 - { message: Server error message}
@@ -213,7 +213,7 @@ module.exports = {
     removeFollower: async (req, res) => {
         try {
             // Remove following
-            await User.findByIdAndUpdate(req.body.userId, {
+            await User.findByIdAndUpdate(req.body.id, {
                 $pull: {
                     following: req.body.unfollowId
                 }
@@ -222,7 +222,7 @@ module.exports = {
             // Remove follower
             let user = await User.findByIdAndUpdate(req.body.unfollowId, {
                 $pull: {
-                    followers: req.body.userId
+                    followers: req.body.id
                 }
             }, { new: true })
                 .populate('following', 'id firstName lastName')
