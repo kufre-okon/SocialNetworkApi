@@ -103,7 +103,7 @@ module.exports = {
                     html: `<p>Please use the following link to reset your password:</p><p>${process.env.CLIENT_URL}/resetpassword/${token}</p>`
                 }
                 await user.updateOne({ resetPasswordLink: token })
-
+ 
                 emailAdmin.send(email, "Password Reset Instructions", emailData.text, emailData.html);
 
                 console.log(emailData.text)

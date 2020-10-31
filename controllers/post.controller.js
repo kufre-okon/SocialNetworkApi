@@ -97,9 +97,8 @@ module.exports = {
   * @returns {object} 200 - image data stream
   */
     getPhoto: async (req, res) => {
-        const postId = req.params.id;
-
-        const post = await Post.findById(postId);
+        const { id } = req.params;
+        const post = await Post.findById(id);
         if (post.photo && post.photo.data) {
             res.set('Content-Type', post.photo.contentType);
             res.send(post.photo.data);
